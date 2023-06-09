@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import qdarktheme
 from PyQt5.QtWidgets import QApplication
 from .gui.mainui import MainWindow
 from .gui.minidialog import MiniDialog
@@ -10,6 +11,7 @@ def main():
     logger = get_logger('__init__')
     logger.info('Starting application in \n3\n2\n1')
     app = QApplication(sys.argv)
+    qdarktheme.setup_theme("auto")
     _dialog = MiniDialog()
     window = MainWindow(_dialog, sys.argv[1] if len(sys.argv) >= 2 else '' )
     app.setDesktopFileName('org.eu.casualsnek.onthespot')
