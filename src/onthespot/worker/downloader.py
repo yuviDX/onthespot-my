@@ -164,6 +164,10 @@ class DownloadWorker(QObject):
                                 return None
                             self.progress.emit([trk_track_id_str, None, [downloaded, total_size]])
                     if not config.get("force_raw"):
+                        self.logger.warning(
+                            f"Force raw is disabled for track by id '{trk_track_id_str}', "
+                            f"media converting and tagging will be done !"
+                        )
                         self.progress.emit([trk_track_id_str, "Converting", None])
                         convert_audio_format(filename, quality)
                         self.progress.emit([trk_track_id_str, "Writing metadata", None])
@@ -171,10 +175,11 @@ class DownloadWorker(QObject):
                         self.progress.emit([trk_track_id_str, "Setting thumbnail", None])
                         set_music_thumbnail(filename, song_info['image_url'])
                     else:
-                        self.logger.warning(
-                            f"Force raw is disabled for track by id '{trk_track_id_str}', "
-                            f"media converting and tagging will be done !"
-                        )
+                        self.progress.emit([trk_track_id_str, "Writing metadata", None])
+                        set_audio_tags(filename, song_info, trk_track_id_str)
+                        self.progress.emit([trk_track_id_str, "Setting thumbnail", None])
+                        set_music_thumbnail(filename, song_info['image_url'])
+                        
                     self.logger.info(f"Downloaded track by id '{trk_track_id_str}'")
                     if config.get('inp_enable_lyrics'):
                         self.progress.emit([trk_track_id_str, "Getting Lyrics", None])
@@ -188,7 +193,7 @@ class DownloadWorker(QObject):
                                     with open(filename[0:-len(config.get('media_format'))] + 'lrc', 'w',
                                               encoding='utf-8') as f:
                                         f.write(lyrics)
-                                if config.get('embed_lyrics', 0):
+                                if config.get('embed_lyrics', 1):
                                     set_audio_tags(filename, {'lyrics': lyrics}, trk_track_id_str)
                                 self.logger.info(f'lyrics saved for: {trk_track_id_str}')
                         except Exception:
